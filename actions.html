@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>用户操作页面</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RileyGe/client-sdk-js@0.11.1/dist/web3a.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RileyGe/client-sdk-js@0.11.2/dist/web3a.js"></script>
     <link rel="stylesheet" href="static/jsoneditor.css" />
     <script src="static/jquery.min.js"></script>
     <script src="static/jquery.jsoneditor.js"></script>
@@ -187,32 +187,6 @@
                 $('#json_div_get_reward').jsonEditor(result, opt);
             });
         }
-        // async function send() {
-        //     try {
-        //         const benefitAddress = 'atp1806v5kyy8g4dfkfqfk47hvsvyfq9dh3u0h748t';
-        //         const nodeId = '0x218b20ee9cd80ea631c771996262a1d4b74b6db5c14321d55f42810a812b128c8c1e3bca0877e19e4ca12db6875d1922f11cfaeb9b2ec78da5157e523c7db8d3';
-        //         let params = {
-        //             funcType: 1001,
-        //             benefitAddress: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(benefitAddress)),
-        //             nodeId: PW3.PPOS.hexToBuffer(nodeId),
-        //             rewardPer: 9500, //传500就是5%的奖励作为委托奖励
-        //             externalId: '17EC25C749FAF0AE',
-        //             nodeName: 'rileyge',
-        //             website: 'http://tson.com',
-        //             details: 'node details changed by js sdk44',
-        //         }
-        //         let rawTx = await pw3.ppos.buildTransaction(params);
-        //         pw3.platon.estimateGas(rawTx).then(function (gas) {
-        //             pw3.platon.getGasPrice().then(function (price) {
-        //                 rawTx.gas = gas;
-        //                 rawTx.gasPrice = price;
-        //                 pw3.platon.sendTransaction(rawTx);
-        //             });
-        //         });
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // }
     </script>
 </head>
 
