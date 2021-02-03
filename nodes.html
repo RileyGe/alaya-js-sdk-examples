@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>节点操作页面</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RileyGe/client-sdk-js@0.11.1/dist/web3a.js"></script>
+    <link rel="stylesheet" href="static/jsoneditor.css" />
+    <script src="static/jquery.min.js"></script>
+    <script src="static/jquery.jsoneditor.js"></script>
+    <script type="text/javascript">
+        window.onload = () => {
+            if (window.alaya) {
+                window.alaya.request({
+                    method: 'platon_requestAccounts'
+                });
+                window.pw3 = new PW3(window.alaya);
+            } else {
+                alert('请安装Samurai')
+            }
+        }        
+        function getNodeInfo() {
+            var nodeId = document.getElementById("nodeid").value;
+            let data = {
+                funcType: 1105,
+                nodeId: PW3.PPOS.hexToBuffer(nodeId)
+            }
+            pw3.ppos.call(data).then(function (result) {
+                console.log(result);
+                document.getElementById("node_name").value = result.Ret.NodeName;
+                document.getElementById("operation_address").innerHTML = result.Ret.StakingAddress;
+                document.getElementById("benefit_address").value = result.Ret.BenefitAddress;
+                document.getElementById("website").value = result.Ret.Website;
+                document.getElementById("reward_per").value = result.Ret.RewardPer;
+                document.getElementById("external_id").value = result.Ret.ExternalId;
+                document.getElementById("details").value = result.Ret.Details;
+            });
+        }        
+        function changeNodeInfo() {
+            const benefitAddress = document.getElementById("benefit_address").value;
+            const nodeId = document.getElementById("nodeid").value;
+            const reward = document.getElementById("reward_per").value*1;
+            const exid = document.getElementById("external_id").value;
+            const nodeName = document.getElementById("node_name").value;
+            const website = document.getElementById("website").value;
+            const details = document.getElementById("details").value;                
+            try {
+                let params = {
+                    funcType: 1001,
+                    benefitAddress: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(benefitAddress)),
+                    nodeId: PW3.PPOS.hexToBuffer(nodeId),
+                    rewardPer: reward, //传500就是5%的奖励作为委托奖励
+                    externalId: exid,
+                    nodeName: nodeName,
+                    website: website,
+                    details: details,
+                }
+                pw3.ppos.estimateGasGaspriceThenSend(params)
+                .catch(function(error){
+                    console.log(error);
+                    alert(error.message);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>用户操作页面</h1>
+    <p>此页面主要进行节点相关操作</p>
+    <span>NodeId:</span><input id="nodeid" />
+    <button type="button" onclick="getNodeInfo()" id="node_info_btn">查询节点信息</button><br />
+    <div>
+        <p>节点名称：<input id="node_name"/></p>
+        <p>操作地址：<span id="operation_address"></span></p>
+        <p>奖励账户：<input id="benefit_address"/></p>
+        <p>官网：<input id="website"/></p>
+        <p>委托奖励比例：<input id="reward_per"/></p>
+        <p>身份认证ID：<input id="external_id"/></p>
+        <p>描述：<input id="details"/></p>
+    </div>
+    <button type="button" id="change_node_info", onclick="changeNodeInfo()">更改节点信息</button>
+</body>
+
+</html>

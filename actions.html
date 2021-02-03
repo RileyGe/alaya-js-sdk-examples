@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>用户操作页面</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RileyGe/client-sdk-js@0.11.1/dist/web3a.js"></script>
+    <link rel="stylesheet" href="static/jsoneditor.css" />
+    <script src="static/jquery.min.js"></script>
+    <script src="static/jquery.jsoneditor.js"></script>
+    <script type="text/javascript">
+        window.onload = () => {
+            if (window.alaya) {
+                window.alaya.request({
+                    method: 'platon_requestAccounts'
+                });
+                window.pw3 = new PW3(window.alaya);
+            } else {
+                alert('请安装Samurai')
+            }
+        }
+
+        function getNodesList() {
+            document.getElementById("node_list_btn").innerHTML = "正在查询。。。"
+            let data = {
+                funcType: 1102,
+            }
+            pw3.ppos.call(data).then(function (result) {
+                // console.log(result);
+                let opt = {
+                    change: function (data) { /* called on every change */ },
+                    propertyclick: function (path) { /* called when a property is clicked with the JS path to that property */ }
+                };
+                /* opt.propertyElement = '<textarea>'; */ // element of the property field, <input> is default
+                /* opt.valueElement = '<textarea>'; */  // element of the value field, <input> is default
+                $('#json_div').jsonEditor(result, opt);
+                document.getElementById("node_list_btn").innerHTML = "查询"
+            });
+        }
+        function queryAllReward() {
+            document.getElementById("all_reward").innerHTML = "正在查询。。。";
+            let reward_adderss = pw3.currentProvider.selectedAddress;
+            let data = {
+                funcType: 5100,
+                address: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(reward_adderss)),
+                nodeIDs: []
+            }
+            pw3.ppos.call(data).then(function (result) {
+                // console.log(result);
+                let opt = {
+                    change: function (data) { /* called on every change */ },
+                    propertyclick: function (path) { /* called when a property is clicked with the JS path to that property */ }
+                };
+                /* opt.propertyElement = '<textarea>'; */ // element of the property field, <input> is default
+                /* opt.valueElement = '<textarea>'; */  // element of the value field, <input> is default
+                $('#json_div_reward').jsonEditor(result, opt);
+                document.getElementById("all_reward").innerHTML = "查询所有奖励";
+            });
+        }
+        function getAccountNodeList() {
+            document.getElementById("account_node_list_btn").innerHTML = "正在查询。。。";
+            var delegate_addr = pw3.currentProvider.selectedAddress;
+            let data = {
+                funcType: 1103,
+                addr: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(delegate_addr))
+            }
+            pw3.ppos.call(data).then(function (result) {
+                // console.log(result);
+                let opt = {
+                    change: function (data) { /* called on every change */ },
+                    propertyclick: function (path) { /* called when a property is clicked with the JS path to that property */ }
+                };
+                /* opt.propertyElement = '<textarea>'; */ // element of the property field, <input> is default
+                /* opt.valueElement = '<textarea>'; */  // element of the value field, <input> is default
+                $('#json_div_account').jsonEditor(result, opt);
+                document.getElementById("account_node_list_btn").innerHTML = "查询"
+            });
+        }
+        function getDelegateAmount() {
+            document.getElementById("delegate_amount_btn").innerHTML = "正在查询。。。"
+            //查询节点的质押信息
+            let nodeId = document.getElementById("nodeid").value;
+            let data = {
+                funcType: 1105,
+                nodeId: PW3.PPOS.hexToBuffer(nodeId)
+            }
+            pw3.ppos.call(data).then(function (result) {
+                var staking_block_num = result.Ret.StakingBlockNum;
+                var delegate_addr = pw3.currentProvider.selectedAddress;
+                data = {
+                    funcType: 1104,
+                    stakingBlockNum: staking_block_num,
+                    delAddr: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(delegate_addr)),
+                    nodeId: PW3.PPOS.hexToBuffer(nodeId)
+                }
+                pw3.ppos.call(data).then(function (result) {
+                    if (result.Code === 301205) {
+                        alert("没有委托");
+                    } else {
+                        document.getElementById("undelegate_amount").value =
+                            pw3.utils.fromVon(result.Ret.RestrictingPlan) * 1 +
+                            pw3.utils.fromVon(result.Ret.ReleasedHes) * 1 +
+                            pw3.utils.fromVon(result.Ret.RestrictingPlanHes) * 1 +
+                            pw3.utils.fromVon(result.Ret.Released) * 1;
+                        document.getElementById("delegate_amount_btn").innerHTML = "查询委托数量";
+                    }
+
+                }).catch(function (error) {
+                    console.log(error.data.message);
+                    alert(error.data.message);
+                    document.getElementById("delegate_amount_btn").innerHTML = "查询委托数量";
+                })
+
+            }).catch(function (error) {
+                console.log(error.data.message);
+                alert(error.data.message);
+                document.getElementById("delegate_amount_btn").innerHTML = "查询委托数量";
+            });
+        }
+
+        function undelegate() {
+            try {
+                let nodeId = document.getElementById("nodeid").value;
+                let data = {
+                    funcType: 1105,
+                    nodeId: PW3.PPOS.hexToBuffer(nodeId)
+                }
+                pw3.ppos.call(data).then(function (result) {
+                    let staking_block_num = result.Ret.StakingBlockNum;
+                    let amount = document.getElementById("undelegate_amount").value;
+                    let params = {
+                        funcType: 1005,
+                        stakingBlockNum: staking_block_num,
+                        nodeId: PW3.PPOS.hexToBuffer(nodeId),
+                        amount: PW3.utils.toBN(PW3.utils.toVon(amount))
+                    }
+                    //我们可以使用send\estimateGasThenSend\estimateGasGaspriceThenSend
+                    //三个方法，方法的作用应该从名字上可以直接看出来
+                    //前两个传入第二个参数，如let other = {gas: 2100, gasPrice: PW3.utils.toBN(PW3.utils.toVon(1, 'gvon'))};
+                    pw3.ppos.estimateGasGaspriceThenSend(params);
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        function delegate() {
+            let nodeId = document.getElementById("nodeid").value;
+            let amount = document.getElementById("delegate_amount").value;
+            let coin_type = document.getElementById("cn_type") * 1;
+            try {
+                let params = {
+                    funcType: 1004,
+                    typ: coin_type,
+                    nodeId: PW3.PPOS.hexToBuffer(nodeId),
+                    amount: pw3.utils.toBN(pw3.utils.toVon(amount))
+                }
+                // pw3.ppos.estimateGasGaspriceThenSend(params);
+                pw3.ppos.buildTransaction(params)
+                    .then(function (rawTx) {
+                        pw3.platon.accounts.signTransaction(rawTx).then(function (signTx) {
+                            web3.platon.sendSignedTransaction(signTx.rawTransaction).then(function (reply) {
+                                console.log(reply);
+                            });
+                        });
+                    });
+
+
+                // 发送交易
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        function getAllReward() {
+            let reward_adderss = pw3.currentProvider.selectedAddress;
+            let data = {
+                funcType: 5000
+            }
+            pw3.ppos.estimateGasGaspriceThenSend(data).then(function (result) {
+                // console.log(result);
+                let opt = {
+                    change: function (data) { /* called on every change */ },
+                    propertyclick: function (path) { /* called when a property is clicked with the JS path to that property */ }
+                };
+                /* opt.propertyElement = '<textarea>'; */ // element of the property field, <input> is default
+                /* opt.valueElement = '<textarea>'; */  // element of the value field, <input> is default
+                $('#json_div_get_reward').jsonEditor(result, opt);
+            });
+        }
+        // async function send() {
+        //     try {
+        //         const benefitAddress = 'atp1806v5kyy8g4dfkfqfk47hvsvyfq9dh3u0h748t';
+        //         const nodeId = '0x218b20ee9cd80ea631c771996262a1d4b74b6db5c14321d55f42810a812b128c8c1e3bca0877e19e4ca12db6875d1922f11cfaeb9b2ec78da5157e523c7db8d3';
+        //         let params = {
+        //             funcType: 1001,
+        //             benefitAddress: PW3.PPOS.hexToBuffer(PW3.utils.decodeBech32Address(benefitAddress)),
+        //             nodeId: PW3.PPOS.hexToBuffer(nodeId),
+        //             rewardPer: 9500, //传500就是5%的奖励作为委托奖励
+        //             externalId: '17EC25C749FAF0AE',
+        //             nodeName: 'rileyge',
+        //             website: 'http://tson.com',
+        //             details: 'node details changed by js sdk44',
+        //         }
+        //         let rawTx = await pw3.ppos.buildTransaction(params);
+        //         pw3.platon.estimateGas(rawTx).then(function (gas) {
+        //             pw3.platon.getGasPrice().then(function (price) {
+        //                 rawTx.gas = gas;
+        //                 rawTx.gasPrice = price;
+        //                 pw3.platon.sendTransaction(rawTx);
+        //             });
+        //         });
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // }
+    </script>
+</head>
+
+<body>
+    <h1>用户操作页面</h1>
+    <p>此页面主要进行委托相关操作</p>
+    <button type="button" onClick="getNodesList();" id="node_list_btn">查询节点列表</button>
+    <div id="json_div" class="json-editor"></div>
+    <button type="button" onclick="getAccountNodeList()" id="account_node_list_btn">查询当前地址所有委托</button>
+    <div id="json_div_account" class="json-editor"></div>
+    <div>
+
+        <span>NodeId:</span><input id="nodeid" />
+        <button type="button" onclick="getDelegateAmount()" id="delegate_amount_btn">查询委托数量</button><br />
+        <span>数量</span><input id="undelegate_amount" />
+        <button type="button" onclick="undelegate();" id="undelegate_btn">赎回委托</button><br />
+        <select id="cn_type">
+            <option value="0">自由金额</option>
+            <option value="1">锁仓金额</option>
+        </select>
+        <span>数量</span><input id="delegate_amount" />
+        <button type="button" onclick="delegate()" id="delegate_btn">委托</button>
+        <div>
+            <button type="button" id="all_reward" onclick="queryAllReward()">查询所有奖励</button>
+        </div>
+        <div id="json_div_reward" class="json-editor"></div>
+        <button type="button" onclick="getAllReward()" id="get_reward">领取所有奖励</button>
+        <div id="json_div_get_reward" class="json-editor"></div>
+    </div>
+
+</body>
+
+</html>

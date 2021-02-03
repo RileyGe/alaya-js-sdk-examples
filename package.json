@@ -1,0 +1,20 @@
+{
+  "name": "alaya-js-sdk-examples",
+  "version": "1.0.0",
+  "description": "提供一些alaya网络js sdk的使用例子",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RileyGe/alaya-js-sdk-examples.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RileyGe/alaya-js-sdk-examples/issues"
+  },
+  "homepage": "https://github.com/RileyGe/alaya-js-sdk-examples#readme"
+}
