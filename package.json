@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/RileyGe/alaya-js-sdk-examples/issues"
   },
-  "homepage": "https://github.com/RileyGe/alaya-js-sdk-examples#readme"
+  "homepage": "https://github.com/RileyGe/alaya-js-sdk-examples#readme",
+  "dependencies": {
+    "web3": "github:PlatONnetwork/client-sdk-js#alaya-dev"
+  }
 }
