@@ -34,10 +34,13 @@
             });
         }
         function getTransInfo() {
-            let transHash = "0xbdbec19726e04e2061c3c8ed2b21e98df413ac5ecc2333e1c71b8f721d1fc345";
+            let transHash = "0x0d9bf0b1255f91d63f7ef7d67a168458fd9dd232e68d9bab930fe33d8875cfae";
             pw3.platon.getTransaction(transHash).then(function (transInfo) {
                 console.log(transInfo);
             });
+            pw3.platon.getBlockNumber().then(function (number){
+                console.log(number)
+            })
         }
         function deployContract() {
             // if(pw3 === undefined){
