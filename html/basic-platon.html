@@ -38,6 +38,9 @@
             pw3.platon.getTransaction(transHash).then(function (transInfo) {
                 console.log(transInfo);
             });
+            pw3.platon.getBlockNumber().then(function (number){
+                console.log(number)
+            })
         }
         function deployContract() {
             // if(pw3 === undefined){
