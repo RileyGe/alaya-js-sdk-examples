@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/RileyGe/alaya-js-sdk-examples#readme",
   "dependencies": {
-    "web3": "github:PlatONnetwork/client-sdk-js#alaya-dev"
+    "web3": "github:AlayaNetwork/client-sdk-js#0.15.1-develop"
   }
 }
